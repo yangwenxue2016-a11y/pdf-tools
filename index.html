@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="全功能在线 PDF 工具集 + AI 增强工具，纯前端本地处理，支持 GitHub Pages 部署。" />
+  <title>PDF Studio AI · 全功能在线 PDF 工具集</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">PDF</div>
+        <div>
+          <h1>PDF Studio AI</h1>
+          <p>纯前端 · 本地处理 · GitHub Pages 可部署</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="themeToggle" class="ghost-btn" type="button">切换主题</button>
+        <button id="openSettingsBtn" class="ghost-btn" type="button">AI 设置</button>
+      </div>
+    </header>
+
+    <section class="hero card glass">
+      <div>
+        <span class="eyebrow">极简操作路径</span>
+        <h2>一站式 PDF 工具 + AI 增强能力</h2>
+        <p>
+          支持拖拽上传、页面管理、批量导出、OCR、摘要、翻译增强、对比分析与本地标注。所有核心处理默认在浏览器内完成，不上传源文件。
+        </p>
+        <div class="hero-actions">
+          <button class="primary-btn" data-target-tool="merge">立即开始</button>
+          <button class="ghost-btn" id="demoDataBtn" type="button">查看功能面板</button>
+        </div>
+      </div>
+      <div class="hero-metrics">
+        <div class="metric-card">
+          <strong>20+</strong>
+          <span>集成功能</span>
+        </div>
+        <div class="metric-card">
+          <strong>0</strong>
+          <span>后端依赖</span>
+        </div>
+        <div class="metric-card">
+          <strong>100%</strong>
+          <span>响应式适配</span>
+        </div>
+      </div>
+    </section>
+
+    <main class="main-grid">
+      <aside class="sidebar card">
+        <div class="sidebar-header">
+          <h3>工具分类</h3>
+          <p>点击直达，无多余层级</p>
+        </div>
+        <nav class="tool-nav" id="toolNav">
+          <button class="tool-nav-item active" data-tool="merge">PDF 页面管理</button>
+          <button class="tool-nav-item" data-tool="optimize">优化与修复</button>
+          <button class="tool-nav-item" data-tool="convert">格式转换</button>
+          <button class="tool-nav-item" data-tool="annotate">编辑与标注</button>
+          <button class="tool-nav-item" data-tool="security">安全与签名</button>
+          <button class="tool-nav-item" data-tool="ocr">OCR 与实用工具</button>
+          <button class="tool-nav-item" data-tool="ai">AI 摘要与翻译</button>
+        </nav>
+        <div class="capabilities">
+          <div class="capability-pill ok">本地处理</div>
+          <div class="capability-pill ok">拖拽上传</div>
+          <div class="capability-pill ok">手机/电脑</div>
+          <div class="capability-pill warn">高级转换有浏览器差异</div>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <section class="tool-panel active" id="tool-merge">
+          <div class="panel-head card">
+            <div>
+              <h3>PDF 页面管理</h3>
+              <p>支持自由排序、删除、插入、合并、拆分、旋转与裁剪联动处理。</p>
+            </div>
+            <div class="panel-actions">
+              <label class="upload-btn">
+                上传 PDF
+                <input type="file" id="mergeInput" accept="application/pdf" multiple hidden />
+              </label>
+              <button id="clearMergeBtn" class="ghost-btn" type="button">清空</button>
+            </div>
+          </div>
+
+          <div class="card dropzone" id="mergeDropzone">
+            <div>
+              <strong>拖拽 PDF 到此处</strong>
+              <p>多文件自动展开为页面缩略图，可直接拖拽排序。</p>
+            </div>
+          </div>
+
+          <div class="panel-grid two-col">
+            <div class="card">
+              <div class="section-head">
+                <h4>页面队列</h4>
+                <div class="inline-tools">
+                  <button id="selectAllPagesBtn" class="mini-btn" type="button">全选</button>
+                  <button id="deleteSelectedPagesBtn" class="mini-btn danger" type="button">删除所选</button>
+                </div>
+              </div>
+              <div id="mergePages" class="page-grid empty-state">
+                <div>
+                  <strong>暂无页面</strong>
+                  <p>上传 PDF 后，这里会显示所有页面缩略图。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head">
+                <h4>导出动作</h4>
+              </div>
+              <div class="form-grid">
+                <label>
+                  新文件名
+                  <input id="mergeFilename" type="text" value="merged-document" />
+                </label>
+                <label>
+                  插入额外 PDF 页面
+                  <input type="file" id="insertPdfInput" accept="application/pdf" multiple />
+                </label>
+              </div>
+              <div class="button-grid">
+                <button id="exportMergedBtn" class="primary-btn" type="button">导出合并 PDF</button>
+                <button id="exportSplitSelectedBtn" class="ghost-btn" type="button">拆分所选页面</button>
+                <button id="exportSplitAllBtn" class="ghost-btn" type="button">全部拆分为独立 PDF</button>
+              </div>
+              <div class="hint-box">
+                <strong>说明</strong>
+                <p>页面旋转、删除、重排会直接应用到导出结果。拖拽即可调整顺序。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tool-panel" id="tool-optimize">
+          <div class="panel-head card">
+            <div>
+              <h3>PDF 优化与修复</h3>
+              <p>支持压缩、基础修复、页面裁剪与归档增强导出。</p>
+            </div>
+            <div class="panel-actions">
+              <label class="upload-btn">
+                上传 PDF
+                <input type="file" id="optimizeInput" accept="application/pdf" hidden />
+              </label>
+            </div>
+          </div>
+
+          <div class="panel-grid two-col">
+            <div class="card stack-gap">
+              <div class="section-head"><h4>压缩</h4></div>
+              <div class="form-grid">
+                <label>
+                  图像质量 <span id="qualityValue">0.72</span>
+                  <input type="range" id="compressQuality" min="0.3" max="0.95" step="0.01" value="0.72" />
+                </label>
+                <label>
+                  渲染倍率 <span id="scaleValue">1.3</span>
+                  <input type="range" id="compressScale" min="1" max="2" step="0.1" value="1.3" />
+                </label>
+              </div>
+              <button id="compressPdfBtn" class="primary-btn" type="button">压缩并下载</button>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head"><h4>裁剪</h4></div>
+              <div class="form-grid crop-grid">
+                <label>上边距 (%)<input id="cropTop" type="number" min="0" max="45" value="4" /></label>
+                <label>右边距 (%)<input id="cropRight" type="number" min="0" max="45" value="4" /></label>
+                <label>下边距 (%)<input id="cropBottom" type="number" min="0" max="45" value="4" /></label>
+                <label>左边距 (%)<input id="cropLeft" type="number" min="0" max="45" value="4" /></label>
+              </div>
+              <button id="cropPdfBtn" class="ghost-btn" type="button">裁剪并下载</button>
+            </div>
+          </div>
+
+          <div class="panel-grid two-col">
+            <div class="card stack-gap">
+              <div class="section-head"><h4>基础修复</h4></div>
+              <p class="minor">重新解析并规范化保存，可修复部分索引错误、兼容性问题与元数据异常。</p>
+              <button id="repairPdfBtn" class="ghost-btn" type="button">修复并下载</button>
+            </div>
+            <div class="card stack-gap">
+              <div class="section-head"><h4>PDF/A 增强导出</h4></div>
+              <p class="minor">当前为静态站增强模式，会做字体与元数据规范化，但不替代专业 PDF/A 认证工具。</p>
+              <button id="archivePdfBtn" class="ghost-btn" type="button">导出归档增强版</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="tool-panel" id="tool-convert">
+          <div class="panel-head card">
+            <div>
+              <h3>双向格式转换</h3>
+              <p>围绕 PDF、图片、Office 文档和网页内容提供本地转换能力。</p>
+            </div>
+          </div>
+
+          <div class="panel-grid three-col">
+            <div class="card stack-gap">
+              <div class="section-head"><h4>PDF → JPG / 图片 ZIP</h4></div>
+              <input type="file" id="pdfToJpgInput" accept="application/pdf" />
+              <button id="pdfToJpgBtn" class="primary-btn" type="button">转换页面为 JPG</button>
+              <p class="minor">按页输出，自动打包 ZIP。</p>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head"><h4>JPG / PNG → PDF</h4></div>
+              <input type="file" id="imagesToPdfInput" accept="image/*" multiple />
+              <label>边距（pt）<input type="number" id="imagePdfMargin" value="24" min="0" max="120" /></label>
+              <button id="imagesToPdfBtn" class="primary-btn" type="button">生成 PDF</button>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head"><h4>PDF → PPTX</h4></div>
+              <input type="file" id="pdfToPptInput" accept="application/pdf" />
+              <button id="pdfToPptBtn" class="primary-btn" type="button">生成演示文稿</button>
+              <p class="minor">按页生成幻灯片，保留版式视觉。</p>
+            </div>
+          </div>
+
+          <div class="panel-grid three-col">
+            <div class="card stack-gap">
+              <div class="section-head"><h4>PDF → Word</h4></div>
+              <input type="file" id="pdfToWordInput" accept="application/pdf" />
+              <button id="pdfToWordBtn" class="ghost-btn" type="button">提取文本生成 DOCX</button>
+              <p class="minor">适合文本型文档，扫描件建议先 OCR。</p>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head"><h4>PDF → Excel</h4></div>
+              <input type="file" id="pdfToExcelInput" accept="application/pdf" />
+              <button id="pdfToExcelBtn" class="ghost-btn" type="button">提取页面文本到 XLSX</button>
+              <p class="minor">表格复杂版式会受原始 PDF 结构影响。</p>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head"><h4>Word / Excel → PDF</h4></div>
+              <input type="file" id="officeToPdfInput" accept=".docx,.xlsx" />
+              <button id="officeToPdfBtn" class="ghost-btn" type="button">渲染并导出 PDF</button>
+              <p class="minor">DOCX 使用 HTML 渲染，XLSX 使用表格渲染。</p>
+            </div>
+          </div>
+
+          <div class="panel-grid two-col">
+            <div class="card stack-gap">
+              <div class="section-head"><h4>网页 HTML → PDF</h4></div>
+              <label>网页 URL<input type="url" id="urlToPdfInput" placeholder="https://example.com" /></label>
+              <button id="urlToPdfBtn" class="ghost-btn" type="button">抓取页面并导出 PDF</button>
+              <p class="minor">受浏览器 CORS 限制，建议用于同源或允许跨域的网站。</p>
+            </div>
+            <div class="card stack-gap">
+              <div class="section-head"><h4>PPT / PPTX → PDF</h4></div>
+              <input type="file" id="pptToPdfInput" accept=".ppt,.pptx" />
+              <button id="pptToPdfBtn" class="ghost-btn" type="button">浏览器兼容转换</button>
+              <p class="minor">纯静态环境下兼容性有限，建议优先使用 PDF → PPTX 逆向流程。</p>
+            </div>
+          </div>
+
+          <div id="convertPreview" class="card preview-card empty-state">
+            <div>
+              <strong>转换预览区</strong>
+              <p>DOCX/XLSX/网页内容渲染后会在这里显示预览。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="tool-panel" id="tool-annotate">
+          <div class="panel-head card">
+            <div>
+              <h3>PDF 编辑与标注</h3>
+              <p>添加文本、图片、形状、签名、水印和页码，支持导出新文件。</p>
+            </div>
+            <div class="panel-actions">
+              <label class="upload-btn">
+                上传 PDF
+                <input type="file" id="annotateInput" accept="application/pdf" hidden />
+              </label>
+            </div>
+          </div>
+
+          <div class="panel-grid editor-layout">
+            <div class="card stack-gap editor-controls">
+              <div class="section-head"><h4>编辑工具</h4></div>
+              <div class="form-grid">
+                <label>文本内容<input id="annotationText" type="text" value="示例文本" /></label>
+                <label>字号<input id="annotationFontSize" type="number" min="8" max="72" value="18" /></label>
+                <label>颜色<input id="annotationColor" type="color" value="#1f2937" /></label>
+                <label>图片/签名<input id="annotationImageInput" type="file" accept="image/*" /></label>
+              </div>
+              <div class="button-grid">
+                <button id="addTextAnnotationBtn" class="ghost-btn" type="button">点击画布添加文本</button>
+                <button id="addRectAnnotationBtn" class="ghost-btn" type="button">点击画布添加矩形</button>
+                <button id="addImageAnnotationBtn" class="ghost-btn" type="button">点击画布添加图片</button>
+              </div>
+              <div class="section-head"><h4>自动处理</h4></div>
+              <div class="form-grid">
+                <label>页码起始<input id="pageNumberStart" type="number" value="1" min="1" /></label>
+                <label>页码位置
+                  <select id="pageNumberPosition">
+                    <option value="bottom-right">右下</option>
+                    <option value="bottom-center">下中</option>
+                    <option value="top-right">右上</option>
+                    <option value="top-center">上中</option>
+                  </select>
+                </label>
+                <label>水印文字<input id="watermarkText" type="text" value="CONFIDENTIAL" /></label>
+                <label>水印透明度<input id="watermarkOpacity" type="number" min="0.05" max="0.7" step="0.05" value="0.18" /></label>
+              </div>
+              <div class="button-grid">
+                <button id="applyPageNumbersBtn" class="ghost-btn" type="button">添加页码</button>
+                <button id="applyWatermarkBtn" class="ghost-btn" type="button">添加文字水印</button>
+                <button id="exportAnnotatedBtn" class="primary-btn" type="button">导出编辑后 PDF</button>
+              </div>
+            </div>
+
+            <div class="card editor-stage-wrap">
+              <div class="section-head">
+                <h4>编辑画布</h4>
+                <div class="inline-tools">
+                  <button id="prevAnnotatePageBtn" class="mini-btn" type="button">上一页</button>
+                  <span id="annotatePageLabel">第 0 / 0 页</span>
+                  <button id="nextAnnotatePageBtn" class="mini-btn" type="button">下一页</button>
+                </div>
+              </div>
+              <div id="editorStage" class="editor-stage empty-state">
+                <div>
+                  <strong>暂无文档</strong>
+                  <p>上传 PDF 后，可直接在页面上点击放置文本、图片和矩形标注。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tool-panel" id="tool-security">
+          <div class="panel-head card">
+            <div>
+              <h3>PDF 安全与签名</h3>
+              <p>提供密码保护、基础解锁尝试、个人签名盖章与永久密文处理。</p>
+            </div>
+          </div>
+
+          <div class="panel-grid three-col">
+            <div class="card stack-gap">
+              <div class="section-head"><h4>PDF 加密</h4></div>
+              <input type="file" id="encryptPdfInput" accept="application/pdf" />
+              <label>打开密码<input id="encryptUserPassword" type="password" placeholder="输入用户密码" /></label>
+              <label>权限密码<input id="encryptOwnerPassword" type="password" placeholder="输入所有者密码" /></label>
+              <button id="encryptPdfBtn" class="primary-btn" type="button">加密并下载</button>
+              <p class="minor">依赖浏览器可用的加密库，失败时会给出提示。</p>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head"><h4>PDF 解锁</h4></div>
+              <input type="file" id="unlockPdfInput" accept="application/pdf" />
+              <label>已知密码<input id="unlockPdfPassword" type="password" placeholder="输入原密码" /></label>
+              <button id="unlockPdfBtn" class="ghost-btn" type="button">尝试解锁</button>
+              <p class="minor">纯前端模式下，仅支持部分文档类型。</p>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head"><h4>标记密文</h4></div>
+              <input type="file" id="redactPdfInput" accept="application/pdf" />
+              <label>需要涂黑的关键词（逗号分隔）<input id="redactKeywords" type="text" value="身份证,手机号" /></label>
+              <button id="redactPdfBtn" class="ghost-btn" type="button">生成密文版 PDF</button>
+              <p class="minor">基于文本位置与覆盖删除，扫描件建议先 OCR。</p>
+            </div>
+          </div>
+
+          <div class="panel-grid two-col">
+            <div class="card stack-gap">
+              <div class="section-head"><h4>个人电子签名</h4></div>
+              <input type="file" id="signPdfInput" accept="application/pdf" />
+              <label>签名图片<input type="file" id="signImageInput" accept="image/*" /></label>
+              <label>签名页码<input id="signPageNumber" type="number" value="1" min="1" /></label>
+              <button id="signPdfBtn" class="primary-btn" type="button">添加签名并下载</button>
+            </div>
+            <div class="card stack-gap">
+              <div class="section-head"><h4>发起他人签名</h4></div>
+              <p class="minor">GitHub Pages 静态站无法直接发起真实签署工作流。此处提供签署占位封面页生成，可与第三方签署平台联动。</p>
+              <label>签署人姓名<input id="signRequestName" type="text" value="待签署人" /></label>
+              <button id="generateSignRequestBtn" class="ghost-btn" type="button">生成签署请求封面</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="tool-panel" id="tool-ocr">
+          <div class="panel-head card">
+            <div>
+              <h3>智能 OCR 与实用工具</h3>
+              <p>支持扫描件识别、相机拍摄生成 PDF，以及双文件内容比对。</p>
+            </div>
+          </div>
+
+          <div class="panel-grid three-col">
+            <div class="card stack-gap">
+              <div class="section-head"><h4>OCR PDF</h4></div>
+              <input type="file" id="ocrPdfInput" accept="application/pdf,image/*" />
+              <label>识别语言
+                <select id="ocrLanguage">
+                  <option value="chi_sim+eng">中文+英文</option>
+                  <option value="eng">英文</option>
+                  <option value="chi_sim">中文</option>
+                </select>
+              </label>
+              <button id="runOcrBtn" class="primary-btn" type="button">开始 OCR</button>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head"><h4>扫描为 PDF</h4></div>
+              <input type="file" id="scanToPdfInput" accept="image/*" capture="environment" multiple />
+              <button id="scanToPdfBtn" class="ghost-btn" type="button">生成扫描 PDF</button>
+              <p class="minor">手机端可直接调用摄像头拍照。</p>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head"><h4>比较 PDF</h4></div>
+              <input type="file" id="comparePdfA" accept="application/pdf" />
+              <input type="file" id="comparePdfB" accept="application/pdf" />
+              <button id="comparePdfBtn" class="ghost-btn" type="button">分析差异</button>
+            </div>
+          </div>
+
+          <div class="panel-grid two-col">
+            <div id="ocrResult" class="card result-card empty-state">
+              <div>
+                <strong>OCR 结果</strong>
+                <p>识别后的文本会显示在这里，可直接复制或下载。</p>
+              </div>
+            </div>
+            <div id="compareResult" class="card result-card empty-state">
+              <div>
+                <strong>对比结果</strong>
+                <p>系统会给出页级和文本差异概览。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tool-panel" id="tool-ai">
+          <div class="panel-head card">
+            <div>
+              <h3>AI 摘要与翻译增强</h3>
+              <p>支持本地摘要、OCR 联动摘要，以及浏览器/外部接口翻译增强。</p>
+            </div>
+            <div class="panel-actions">
+              <button id="reuseOcrTextBtn" class="ghost-btn" type="button">复用 OCR 文本</button>
+            </div>
+          </div>
+
+          <div class="panel-grid two-col">
+            <div class="card stack-gap">
+              <div class="section-head"><h4>AI 摘要工具</h4></div>
+              <input type="file" id="summaryPdfInput" accept="application/pdf,.txt" />
+              <label>摘要句数<input id="summarySentences" type="number" value="6" min="3" max="12" /></label>
+              <button id="generateSummaryBtn" class="primary-btn" type="button">生成摘要</button>
+              <p class="minor">默认使用本地抽取式摘要算法，可批量处理长文。</p>
+            </div>
+
+            <div class="card stack-gap">
+              <div class="section-head"><h4>AI PDF 翻译</h4></div>
+              <input type="file" id="translatePdfInput" accept="application/pdf,.txt" />
+              <label>目标语言
+                <select id="translateTargetLanguage">
+                  <option value="zh-CN">中文</option>
+                  <option value="en">英文</option>
+                  <option value="ja">日文</option>
+                </select>
+              </label>
+              <button id="translatePdfBtn" class="ghost-btn" type="button">开始翻译</button>
+              <p class="minor">优先调用浏览器内置 AI 或本地配置的兼容接口；静态站无法保证 100% 原版排版复刻。</p>
+            </div>
+          </div>
+
+          <div class="panel-grid two-col">
+            <div id="summaryResult" class="card result-card empty-state">
+              <div>
+                <strong>摘要结果</strong>
+                <p>将自动提取要点、关键术语和高频主题。</p>
+              </div>
+            </div>
+            <div id="translationResult" class="card result-card empty-state">
+              <div>
+                <strong>翻译结果</strong>
+                <p>翻译文本与处理日志会显示在这里。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loader-card">
+      <div class="spinner"></div>
+      <strong id="loadingText">处理中…</strong>
+      <p>文件全部在浏览器内处理，请勿关闭页面。</p>
+    </div>
+  </div>
+
+  <dialog id="settingsDialog" class="settings-dialog">
+    <form method="dialog" class="card stack-gap">
+      <div class="section-head"><h4>AI 接口设置</h4></div>
+      <p class="minor">仅用于翻译增强。会保存在本地浏览器，不会上传到仓库。</p>
+      <label>OpenAI 兼容 Base URL<input id="apiBaseUrl" type="url" placeholder="https://api.openai.com/v1" /></label>
+      <label>API Key<input id="apiKey" type="password" placeholder="sk-..." /></label>
+      <label>模型名称<input id="apiModel" type="text" placeholder="gpt-4.1-mini" /></label>
+      <div class="button-grid">
+        <button id="saveSettingsBtn" class="primary-btn" type="submit">保存设置</button>
+        <button class="ghost-btn" type="submit">关闭</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib-plus-encrypt@1.0.28/dist/pdf-lib-plus-encrypt.min.js"></script>
+  <script type="module" src="./assets/app.js"></script>
+</body>
+</html>
